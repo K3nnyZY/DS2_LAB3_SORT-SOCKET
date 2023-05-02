@@ -62,7 +62,7 @@ try:
     port2 = 12346
     client.conectar_a_servidor(host, port1, port2)
 
-    time_limit = 2  # Aquí puedes ajustar el límite de tiempo para cada worker
+    time_limit = 10  # Aquí puedes ajustar el límite de tiempo para cada worker
 
     while True:
         # Lee el vector y valida que esté compuesto únicamente por números
@@ -105,6 +105,9 @@ try:
 
         # Recibir el resultado del primer worker
         worker1_result = client.recv_data(client.s1)
+        if 'Flag' not in worker1_result:
+            print("Error: 'Flag' not found in received data")
+            continue
 
         if worker1_result["Flag"] <= time_limit:
             # Si el primer worker finalizó a tiempo
@@ -118,6 +121,9 @@ try:
 
             # Recibir el resultado del segundo worker
             worker2_result = client.recv_data(client.s2)
+            if 'Flag' not in worker2_result:
+                print("Error: 'Flag' not found in received data")
+                continue
 
             sorted_array = worker2_result["arr"]
             total_time = worker1_result["Flag"] + worker2_result["Flag"]

@@ -13,9 +13,9 @@ def process_request(conn, addr, worker_id, other_worker_addr):
 
             print(f"Worker {worker_id} recibió datos del cliente: {data}") # Agregado
 
-            vector = data["a"]
+            vector = data.get("a", [])
             algoritmo = data["b"]
-            tiempo_limite = data["c"]
+            tiempo_limite = data.get("c", 0)
 
             if algoritmo == "1":
                 start_time = time.time()

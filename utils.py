@@ -17,9 +17,9 @@ def send_data_to_other_worker(worker_id, other_worker_addr, vector):
     print(f"Worker {worker_id}: Sending data to other worker at {other_worker_addr}")
     with socket.socket() as other_worker_conn:
         other_worker_conn.connect(other_worker_addr)
-        send_data(other_worker_conn, {"vector": vector})
+        send_data(other_worker_conn, {"a": vector, "b": "1", "c": 0})
         response = recv_data(other_worker_conn)
-        sorted_vector = response["vector"]
+        sorted_vector = response["arr"]
         print(f"Worker {worker_id}: Received sorted data from other worker at {other_worker_addr}: {sorted_vector}")
         return sorted_vector
 
@@ -117,8 +117,11 @@ def generate_vector(n):
 
 
 def send_data(conn, data):
-    msg = json.dumps(data).encode()
-    conn.sendall(msg)
+    try:
+        msg = json.dumps(data).encode()
+        conn.sendall(msg)
+    except BrokenPipeError:
+        print("Error al enviar datos: conexión rota.")
 
 
 def recv_data(conn):
@@ -129,4 +132,11 @@ def recv_data(conn):
         data += part
         if len(part) < buffer_size:
             break
-    return json.loads(data.decode())
+
+    try:
+        return json.loads(data.decode())
+    except json.JSONDecodeError:
+        print("Error al decodificar los datos recibidos.")
+        return {}  # Retorna un diccionario vacío como valor predeterminado
+
+
