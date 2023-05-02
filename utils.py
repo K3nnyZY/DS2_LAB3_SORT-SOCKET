@@ -12,6 +12,7 @@ def send_data_to_other_worker(conn, other_worker_addr, vector):
         response = recv_data(other_worker_conn)
         return response["vector"]
 
+
 def merge_sort(arr, conn, other_worker_addr, start_time, time_limit):
     if time.time() - start_time > time_limit:
         return send_data_to_other_worker(conn, other_worker_addr, arr)
@@ -45,6 +46,7 @@ def merge(left, right):
 
     return result
 
+
 def heap_sort(arr, conn, other_worker_addr, start_time, time_limit):
     if time.time() - start_time > time_limit:
         return send_data_to_other_worker(conn, other_worker_addr, arr)
@@ -57,26 +59,17 @@ def heap_sort(arr, conn, other_worker_addr, start_time, time_limit):
 
         if time.time() - start_time > time_limit:
             break
-
     return sorted_arr
 
+
 def quick_sort(arr, low, high, conn, other_worker_addr, start_time, time_limit):
-    if low >= high:
-        return arr
+    if time.time() - start_time > time_limit:
+        return send_data_to_other_worker(conn, other_worker_addr, arr)
 
-    stack = [(low, high)]
-
-    while stack:
-        lo, hi = stack.pop()
-
-        if time.time() - start_time > time_limit:
-            return send_data_to_other_worker(conn, other_worker_addr, arr)
-
-        if lo < hi:
-            pivot_index = partition(arr, lo, hi)
-            stack.append((lo, pivot_index))
-            stack.append((pivot_index + 1, hi))
-
+    if low < high:
+        pivot_index = partition(arr, low, high)
+        quick_sort(arr, low, pivot_index, conn, other_worker_addr, start_time, time_limit)
+        quick_sort(arr, pivot_index + 1, high, conn, other_worker_addr, start_time, time_limit)
     return arr
 
 def partition(arr, low, high):

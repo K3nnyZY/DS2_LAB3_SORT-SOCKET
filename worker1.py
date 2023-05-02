@@ -23,7 +23,7 @@ def process_request(conn, addr, other_worker_addr):
                 start_time = time.time()
                 vector = heap_sort(vector, conn, other_worker_addr, start_time, tiempo_limite)
                 end_time = time.time()
-            elif algoritmo == "3":
+            elif algoritmo in ("3", "4"):
                 start_time = time.time()
                 vector = quick_sort(vector, 0, len(vector) - 1, conn, other_worker_addr, start_time, tiempo_limite)
                 end_time = time.time()
