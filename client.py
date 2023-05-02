@@ -26,7 +26,10 @@ class Client:
             if len(part) < buffer_size:
                 break
         decoded_data = json.loads(data.decode())
-        print(f"Received data from worker {decoded_data['worker_id']}: {decoded_data}")
+        if 'worker_id' not in decoded_data:
+            print("Error: 'worker_id' not found in received data")
+        else:
+            print(f"Received data from worker {decoded_data['worker_id']}: {decoded_data}")
         return decoded_data
 
     def generate_random_vector(self, n):

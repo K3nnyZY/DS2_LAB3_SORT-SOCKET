@@ -32,7 +32,11 @@ def process_request(conn, addr, worker_id, other_worker_addr):
 
             tiempo = round(end_time - start_time, 5)
 
-            response = {"Flag": tiempo, "arr": vector}
+            response = {
+                "worker_id": worker_id,
+                "arr": vector,
+                "Flag": tiempo
+            }
             send_data(conn, response)
 
         except (json.decoder.JSONDecodeError, ConnectionResetError):
