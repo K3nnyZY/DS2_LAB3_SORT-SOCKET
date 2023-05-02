@@ -1,35 +1,44 @@
+import random
 import socket
 import json
+import time
 
 class Client:
     def __init__(self):
-        self.s = socket.socket()
-    
-    def conectar_a_servidor(self):
-        self.s.connect(("", 12345))
-        
+        self.s1 = socket.socket()
+        self.s2 = socket.socket()
+
+    def conectar_a_servidor(self, host, port1, port2):
+        self.s1.connect((host, port1))
+        self.s2.connect((host, port2))
+
+    def send_data(self, sock, data):
+        msg = json.dumps(data).encode()
+        sock.sendall(msg)
+
+    def recv_data(self, sock):
+        buffer_size = 4096
+        data = b""
+        while True:
+            part = sock.recv(buffer_size)
+            data += part
+            if len(part) < buffer_size:
+                break
+        return json.loads(data.decode())
+
+    def generate_random_vector(self, n):
+        min_value = 1
+        max_value = 1000000
+        return [random.randint(min_value, max_value) for _ in range(n)]
+
     def leer_vector(self, v):
-        v_list = []
-        while len(v)<1 and not(len(v_list)==1 and v_list[0]=="s"):
-            v_list = (input("\nIngrese el vector a ordenar o \"s\" para salir: ")).split(",")
-            for e in v_list:
-                if e.strip().isnumeric():
-                    v.append(int(e.strip()))
-                else:
-                    if not(len(v_list)==1 and v_list[0]=="s" 
-                        or ((e.strip().isspace() or e.strip()=="")
-                            and v_list.index(e)==len(v_list)-1
-                            and len(v)>1)):
-                        print("El vector ingresado no cumple con las "+
-                            "instrucciones dadas:\nEl elemento \""+e.strip()+
-                            "\" no puede añadirse al vector. \nRecuerde que "+
-                            "solo puede contener números y debe separarlos "+
-                            "por comas.")
-                        v = []
-                        break
+        n = int(input("\nIngrese el tamaño del vector a generar (entre 1000 y 1000000): "))
+        while n < 1000 or n > 1000000:
+            print("El tamaño del vector debe estar entre 1000 y 1000000.")
+            n = int(input("\nIngrese el tamaño del vector a generar (entre 1000 y 1000000): "))
+        v.extend(self.generate_random_vector(n))
 
     def escoger_algoritmo(self):
-        # Preguntamos que algoritmo quiere escoger
         print("Escoja entre los algoritmos de ordenamiento:"+
               "\n1. MergeSort.\n2. HeapSort.\n3. QuickSort.")
         opc = (input("Ingrese su opción: ")).strip()
@@ -39,25 +48,28 @@ class Client:
             opc = (input("\nIngrese su opción: ")).strip()
             
         return opc
-    
 
 try:
     client = Client()
-    client.conectar_a_servidor()
-    
+    host = "localhost"
+    port1 = 12345
+    port2 = 12346
+    client.conectar_a_servidor(host, port1, port2)
+
+    time_limit = 10  # Aquí puedes ajustar el límite de tiempo para cada worker
+
     while True:
-        
-        # Lee el vector y valida que este compuesto únicamente por números
+        # Lee el vector y valida que esté compuesto únicamente por números
         v = []
         client.leer_vector(v)
-        
-        if len(v)<1:
-            
+
+        if len(v) < 1:
             # Si desea cerrar el programa
             data = json.dumps({"a": 1, "b": "5"})
-            client.s.send(data.encode())
+            client.send_data(client.s1, data)
+            client.send_data(client.s2, data)
             break
-        
+
         else:
             opc = client.escoger_algoritmo()
             print("\nArray original:", v)
@@ -75,49 +87,29 @@ try:
                     print("La opción ingresada es inválida. Intente de nuevo.")
                     pivote = input("\nSeleccione su pivote (1/Izquierda o 2/Derecha): ").strip()
                 opc = "4" if pivote == "2" else "3"
+                data = json.dumps({"a": v, "b": opc})
 
-            # Codificamos el vector y una variable para indicarle al server 
-            # lo que hay que hacer
-            data = json.dumps({"a": v, "b": opc})
-                
-            # Mandamos la data codificada al server
-            client.s.send(data.encode())
-                
-            # Recibimos una respuesta del server (esta es para el ping)
-            rcvd_data = client.s.recv(1024)
-            rcvd_data = json.loads(rcvd_data.decode())
-            
-            # Se responde al server para que continúe
-            data = json.dumps(rcvd_data)
-            client.s.send(data.encode())
+                # Enviar la data al primer worker
+                client.send_data(client.s1, data)
 
-            print("Progreso de ordenamiento del array:")
+                # Esperar el límite de tiempo
+                time.sleep(time_limit)
 
-            while rcvd_data.get("Flag") == "Bandera":
+                # Enviar la data al segundo worker
+                client.send_data(client.s2, data)
 
-                # Recibimos respuestas del server
-                rcvd_data = client.s.recv(1024)
-                rcvd_data = json.loads(rcvd_data.decode())
+                # Recibir e imprimir los resultados de ambos workers
+                worker1_result = client.recv_data(client.s1)
+                worker2_result = client.recv_data(client.s2)
 
-                # Si el server acaba el ordenamiento,
-                # manda un ping para romper el ciclo
-                if rcvd_data.get("Flag") != "Bandera":
-                    break
-                else:
-                    # Se imprime lo que nos manda el server
-                    print(rcvd_data.get("arr"))
+                sorted_array = worker2_result["vector"] if worker2_result["completed"] else worker1_result["vector"]
+                total_time = worker1_result["time"] + worker2_result["time"]
 
-                    # Responde al server para que continúe
-                    data = json.dumps(rcvd_data)
-                    client.s.send(data.encode())
+                print("\nArray ordenado:", sorted_array)
+                print("Tiempo total de ordenamiento: {:.2f} segundos".format(total_time))
 
-            # Se imprime el resultado final
-            print("\nTiempo de ejecución:", rcvd_data.get("Flag"), "segundos")
-            print("Resultado final:", rcvd_data.get("arr"), "\n")    
-
-    print("\nEl programa ha sido interrumpido.")
-    print("Cerrando conexión y liberando el puerto.\n") 
-
+        print("\nEl programa ha sido interrumpido.")
+        print("Cerrando conexión y liberando el puerto.\n") 
 except KeyboardInterrupt:
     # Para cerrar todo por si acaso
     print("\n* * * * * * * * * * * * *\n")
@@ -133,5 +125,6 @@ except json.decoder.JSONDecodeError or ConnectionResetError:
     print("Cerrando conexión y liberando el puerto.\n")
 
 finally:
-    client.s.close()
+    client.s1.close()
+    client.s2.close()
 

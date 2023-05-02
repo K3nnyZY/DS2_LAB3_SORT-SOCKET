@@ -2,72 +2,53 @@ import socket
 import json
 import time
 import threading
-from sorting_algortihms import merge_sort, heap_sort, quick_sort
+from utils import merge_sort, heap_sort, quick_sort, send_data, recv_data
 
 def process_request(conn, addr):
     while True:
         try:
-            data = conn.recv(1024)
+            data = recv_data(conn)
             if not data:
                 break
-
-            data = json.loads(data.decode())
+            
             vector = data["a"]
             algoritmo = data["b"]
-
-            if algoritmo == "5":
-                print(f"El cliente {addr} ha decidido salir.")
-                break
-
-            print(f"\nCliente {addr}: Vector recibido: {vector}")
-            print(f"Cliente {addr}: Algoritmo seleccionado: {algoritmo}")
+            tiempo_limite = data["c"]
 
             if algoritmo == "1":
                 start_time = time.time()
-                vector = merge_sort(vector, conn)
+                vector = merge_sort(vector, conn, addr, start_time, tiempo_limite)
                 end_time = time.time()
-                algoritmo_nombre = "Merge Sort"
             elif algoritmo == "2":
                 start_time = time.time()
-                vector = heap_sort(vector, conn)
+                vector = heap_sort(vector, conn, addr, start_time, tiempo_limite)
                 end_time = time.time()
-                algoritmo_nombre = "Heap Sort"
             elif algoritmo in ("3", "4"):
                 start_time = time.time()
-                vector = quick_sort(vector, conn, algoritmo)
+                vector = quick_sort(vector, 0, len(vector) - 1, conn, addr, start_time, tiempo_limite, algoritmo)
                 end_time = time.time()
-                algoritmo_nombre = "Quick Sort"
-            else:
-                raise ValueError("Algoritmo no válido")
 
             tiempo = round(end_time - start_time, 5)
 
-            print(f"Cliente {addr}: Vector ordenado usando {algoritmo_nombre}: {vector}")
-            print(f"Cliente {addr}: Tiempo de ejecución: {tiempo} segundos")
-
             response = {"Flag": tiempo, "arr": vector}
-            conn.send(json.dumps(response).encode())
+            send_data(conn, response)
 
         except (json.decoder.JSONDecodeError, ConnectionResetError):
             print(f"El cliente {addr} se ha desconectado.")
             break
-        except ValueError as e:
-            print(e)
-            break
 
     conn.close()
 
-
-class Server:
+class Worker:
     def __init__(self):
         self.s = socket.socket()
         self.host = ""
-        self.port = 12345
+        self.port = 12346
 
     def start(self):
         self.s.bind((self.host, self.port))
         self.s.listen(5)
-        print(f"El servidor está corriendo en {self.host}:{self.port}\n")
+        print(f"El worker1 está corriendo en {self.host}:{self.port}")
 
         while True:
             conn, addr = self.s.accept()
@@ -76,7 +57,6 @@ class Server:
             thread = threading.Thread(target=process_request, args=(conn, addr))
             thread.start()
 
-
 if __name__ == "__main__":
-    server = Server()
-    server.start()
+    worker1 = Worker()
+    worker1.start()
