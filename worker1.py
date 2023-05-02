@@ -11,6 +11,8 @@ def process_request(conn, addr, worker_id, other_worker_addr):
             if not data:
                 break
 
+            print(f"Worker {worker_id} recibió datos del cliente: {data}") # Agregado
+
             vector = data["a"]
             algoritmo = data["b"]
             tiempo_limite = data["c"]
@@ -50,7 +52,7 @@ class Worker:
     def start(self):
         self.s.bind((self.host, self.port))
         self.s.listen(5)
-        print(f"El worker {self.worker_id} está corriendo en {self.host}:{self.port}")
+        print(f"Worker {self.worker_id} iniciado y escuchando en el puerto {self.port}.") # Agregado
 
         while True:
             conn, addr = self.s.accept()

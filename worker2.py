@@ -11,6 +11,8 @@ def process_request(conn, addr, worker_id, other_worker_addr):
             if not data:
                 break
 
+            print(f"Worker {worker_id} recibió datos del cliente: {data}") # Agregado
+
             vector = data["a"]
             algoritmo = data["b"]
             tiempo_limite = data["c"]
@@ -44,13 +46,13 @@ class Worker:
         self.worker_id = worker_id
         self.s = socket.socket()
         self.host = "0.0.0.0"
-        self.port = 12346
+        self.port = 12345
         self.other_worker_addr = other_worker_addr
 
     def start(self):
         self.s.bind((self.host, self.port))
         self.s.listen(5)
-        print(f"El worker {self.worker_id} está corriendo en {self.host}:{self.port}")
+        print(f"Worker {self.worker_id} iniciado y escuchando en el puerto {self.port}.") # Agregado
 
         while True:
             conn, addr = self.s.accept()
@@ -61,6 +63,6 @@ class Worker:
 
 if __name__ == "__main__":
     worker_id = 2
-    other_worker_addr = ("127.0.0.1", 12345)  # Cambie la dirección IP y el puerto según su configuración
+    other_worker_addr = ("127.0.0.1", 12346)  # Cambie la dirección IP y el puerto según su configuración
     worker2 = Worker(worker_id, other_worker_addr)
     worker2.start()

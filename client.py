@@ -13,6 +13,7 @@ class Client:
         self.s2.connect((host, port2))
 
     def send_data(self, sock, data):
+        print(f"Sending data to worker {data['worker_id']}: {data}")
         msg = json.dumps(data).encode()
         sock.sendall(msg)
 
@@ -24,7 +25,9 @@ class Client:
             data += part
             if len(part) < buffer_size:
                 break
-        return json.loads(data.decode())
+        decoded_data = json.loads(data.decode())
+        print(f"Received data from worker {decoded_data['worker_id']}: {decoded_data}")
+        return decoded_data
 
     def generate_random_vector(self, n):
         min_value = 1
@@ -42,11 +45,11 @@ class Client:
         print("Escoja entre los algoritmos de ordenamiento:"+
               "\n1. MergeSort.\n2. HeapSort.\n3. QuickSort.")
         opc = (input("Ingrese su opción: ")).strip()
-                
+
         while opc not in ("1", "2", "3"):
             print("Opción inválida. Intente de nuevo.")
             opc = (input("\nIngrese su opción: ")).strip()
-            
+
         return opc
 
 try:

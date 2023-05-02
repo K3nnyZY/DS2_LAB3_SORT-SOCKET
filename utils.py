@@ -26,7 +26,7 @@ def send_data_to_other_worker(worker_id, other_worker_addr, vector):
 
 def merge_sort(arr, worker_id, other_worker_addr, start_time, time_limit):
     if time.time() - start_time > time_limit:
-        print("Tiempo límite alcanzado en merge_sort, enviando al otro worker...")
+        print(f"Worker {worker_id}: Tiempo límite alcanzado en merge_sort, enviando al otro worker...")
         return send_data_to_other_worker(worker_id, other_worker_addr, arr)
 
     if len(arr) > 1:
@@ -62,7 +62,7 @@ def merge(left, right):
 
 def heap_sort(arr, worker_id, other_worker_addr, start_time, time_limit):
     if time.time() - start_time > time_limit:
-        print("Tiempo límite alcanzado en heap_sort, enviando al otro worker...")
+        print(f"Worker {worker_id}: Tiempo límite alcanzado en heap_sort, enviando al otro worker...")
         return send_data_to_other_worker(worker_id, other_worker_addr, arr)
 
     heapq.heapify(arr)
@@ -78,7 +78,7 @@ def heap_sort(arr, worker_id, other_worker_addr, start_time, time_limit):
 
 def quick_sort(arr, low, high, worker_id, other_worker_addr, start_time, time_limit):
     if time.time() - start_time > time_limit:
-        print("Tiempo límite alcanzado en quick_sort, enviando al otro worker...")
+        print(f"Worker {worker_id}: Tiempo límite alcanzado en quick_sort, enviando al otro worker...")
         return send_data_to_other_worker(worker_id, other_worker_addr, arr)
 
     if low < high:
