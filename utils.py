@@ -3,6 +3,7 @@ import random
 import json
 import heapq
 import socket
+from collections import deque
 
 def send_data_to_other_worker(conn, other_worker_addr, vector):
     with socket.socket() as other_worker_conn:
@@ -60,13 +61,21 @@ def heap_sort(arr, conn, other_worker_addr, start_time, time_limit):
     return sorted_arr
 
 def quick_sort(arr, low, high, conn, other_worker_addr, start_time, time_limit):
-    if time.time() - start_time > time_limit:
-        return send_data_to_other_worker(conn, other_worker_addr, arr)
+    if low >= high:
+        return arr
 
-    if low < high:
-        pivot_index = partition(arr, low, high)
-        quick_sort(arr, low, pivot_index, conn, other_worker_addr, start_time, time_limit)
-        quick_sort(arr, pivot_index + 1, high, conn, other_worker_addr, start_time, time_limit)
+    stack = [(low, high)]
+
+    while stack:
+        lo, hi = stack.pop()
+
+        if time.time() - start_time > time_limit:
+            return send_data_to_other_worker(conn, other_worker_addr, arr)
+
+        if lo < hi:
+            pivot_index = partition(arr, lo, hi)
+            stack.append((lo, pivot_index))
+            stack.append((pivot_index + 1, hi))
 
     return arr
 

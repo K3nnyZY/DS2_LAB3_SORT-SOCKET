@@ -33,7 +33,7 @@ class Client:
 
     def leer_vector(self, v):
         n = int(input("\nIngrese el tamaño del vector a generar (entre 1000 y 1000000): "))
-        while n < 100 or n > 10000:
+        while n < 1000 or n > 1000000:
             print("El tamaño del vector debe estar entre 1000 y 1000000.")
             n = int(input("\nIngrese el tamaño del vector a generar (entre 1000 y 1000000): "))
         v.extend(self.generate_random_vector(n))
@@ -81,12 +81,6 @@ try:
             }
             print("\n* Ejecutando {} *\n".format(algoritmo[opc]))
 
-            if opc == "3":
-                pivote = input("Seleccione su pivote (1/Izquierda o 2/Derecha): ").strip()
-                while pivote not in("1", "2"):
-                    print("La opción ingresada es inválida. Intente de nuevo.")
-                    pivote = input("\nSeleccione su pivote (1/Izquierda o 2/Derecha): ").strip()
-                opc = "4" if pivote == "2" else "3"
             data = {"a": v, "b": opc, "c": float(time_limit)}
 
             # Enviar la data al primer worker
