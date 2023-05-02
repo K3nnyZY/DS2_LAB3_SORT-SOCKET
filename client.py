@@ -33,7 +33,7 @@ class Client:
 
     def leer_vector(self, v):
         n = int(input("\nIngrese el tamaño del vector a generar (entre 1000 y 1000000): "))
-        while n < 1000 or n > 1000000:
+        while n < 100 or n > 10000:
             print("El tamaño del vector debe estar entre 1000 y 1000000.")
             n = int(input("\nIngrese el tamaño del vector a generar (entre 1000 y 1000000): "))
         v.extend(self.generate_random_vector(n))

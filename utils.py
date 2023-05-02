@@ -101,7 +101,7 @@ def send_data(conn, data):
     conn.sendall(msg)
 
 def recv_data(conn):
-    buffer_size = 4096
+    buffer_size = 16384
     data = b""
     while True:
         part = conn.recv(buffer_size)
