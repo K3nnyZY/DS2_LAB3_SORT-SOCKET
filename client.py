@@ -17,7 +17,7 @@ class Client:
         sock.sendall(msg)
 
     def recv_data(self, sock):
-        buffer_size = 4096
+        buffer_size = 16384
         data = b""
         while True:
             part = sock.recv(buffer_size)
@@ -51,12 +51,12 @@ class Client:
 
 try:
     client = Client()
-    host = "localhost"
+    host = "192.168.1.6"
     port1 = 12345
     port2 = 12346
     client.conectar_a_servidor(host, port1, port2)
 
-    time_limit = 10  # Aquí puedes ajustar el límite de tiempo para cada worker
+    time_limit = 2  # Aquí puedes ajustar el límite de tiempo para cada worker
 
     while True:
         # Lee el vector y valida que esté compuesto únicamente por números
