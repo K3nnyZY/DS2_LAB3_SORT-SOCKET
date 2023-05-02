@@ -86,7 +86,7 @@ try:
                     print("La opción ingresada es inválida. Intente de nuevo.")
                     pivote = input("\nSeleccione su pivote (1/Izquierda o 2/Derecha): ").strip()
                 opc = "4" if pivote == "2" else "3"
-            data = {"a": v, "b": opc, "c": time_limit}
+            data = {"a": v, "b": opc, "c": float(time_limit)}
 
         # Enviar la data al primer worker
         client.send_data(client.s1, data)
