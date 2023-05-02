@@ -1,7 +1,6 @@
 import random
 import socket
 import json
-import time
 
 class Client:
     def __init__(self):
@@ -87,29 +86,34 @@ try:
                     print("La opción ingresada es inválida. Intente de nuevo.")
                     pivote = input("\nSeleccione su pivote (1/Izquierda o 2/Derecha): ").strip()
                 opc = "4" if pivote == "2" else "3"
-                data = json.dumps({"a": v, "b": opc})
+            data = {"a": v, "b": opc, "c": time_limit}
 
-                # Enviar la data al primer worker
-                client.send_data(client.s1, data)
+        # Enviar la data al primer worker
+        client.send_data(client.s1, data)
 
-                # Esperar el límite de tiempo
-                time.sleep(time_limit)
+        # Recibir el resultado del primer worker
+        worker1_result = client.recv_data(client.s1)
 
-                # Enviar la data al segundo worker
-                client.send_data(client.s2, data)
+        if worker1_result["Flag"] <= time_limit:
+            # Si el primer worker finalizó a tiempo
+            sorted_array = worker1_result["arr"]
+            total_time = worker1_result["Flag"]
+        else:
+            # Si el primer worker no finalizó a tiempo, enviar la data al segundo worker
+            client.send_data(client.s2, data)
 
-                # Recibir e imprimir los resultados de ambos workers
-                worker1_result = client.recv_data(client.s1)
-                worker2_result = client.recv_data(client.s2)
+            # Recibir el resultado del segundo worker
+            worker2_result = client.recv_data(client.s2)
 
-                sorted_array = worker2_result["vector"] if worker2_result["completed"] else worker1_result["vector"]
-                total_time = worker1_result["time"] + worker2_result["time"]
+            sorted_array = worker2_result["arr"]
+            total_time = worker1_result["Flag"] + worker2_result["Flag"]
 
-                print("\nArray ordenado:", sorted_array)
-                print("Tiempo total de ordenamiento: {:.2f} segundos".format(total_time))
+        print("\nArray ordenado:", sorted_array)
+        print("Tiempo total de ordenamiento: {:.5f} segundos".format(total_time))
 
-        print("\nEl programa ha sido interrumpido.")
-        print("Cerrando conexión y liberando el puerto.\n") 
+    print("\nEl programa ha sido interrumpido.")
+    print("Cerrando conexión y liberando el puerto.\n") 
+
 except KeyboardInterrupt:
     # Para cerrar todo por si acaso
     print("\n* * * * * * * * * * * * *\n")
@@ -127,4 +131,3 @@ except json.decoder.JSONDecodeError or ConnectionResetError:
 finally:
     client.s1.close()
     client.s2.close()
-

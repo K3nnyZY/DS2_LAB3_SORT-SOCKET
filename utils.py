@@ -2,12 +2,18 @@ import time
 import random
 import json
 import heapq
+import socket
+
+def send_data_to_other_worker(conn, other_worker_addr, vector):
+    with socket.socket() as other_worker_conn:
+        other_worker_conn.connect(other_worker_addr)
+        send_data(other_worker_conn, {"vector": vector})
+        response = recv_data(other_worker_conn)
+        return response["vector"]
 
 def merge_sort(arr, conn, other_worker_addr, start_time, time_limit):
     if time.time() - start_time > time_limit:
-        send_data(conn, {"vector": arr, "other_worker": other_worker_addr})
-        response = recv_data(conn)
-        return response["vector"]
+        return send_data_to_other_worker(conn, other_worker_addr, arr)
 
     if len(arr) > 1:
         mid = len(arr) // 2
@@ -40,9 +46,7 @@ def merge(left, right):
 
 def heap_sort(arr, conn, other_worker_addr, start_time, time_limit):
     if time.time() - start_time > time_limit:
-        send_data(conn, {"vector": arr, "other_worker": other_worker_addr})
-        response = recv_data(conn)
-        return response["vector"]
+        return send_data_to_other_worker(conn, other_worker_addr, arr)
 
     heapq.heapify(arr)
 
@@ -57,9 +61,7 @@ def heap_sort(arr, conn, other_worker_addr, start_time, time_limit):
 
 def quick_sort(arr, low, high, conn, other_worker_addr, start_time, time_limit):
     if time.time() - start_time > time_limit:
-        send_data(conn, {"vector": arr, "other_worker": other_worker_addr})
-        response = recv_data(conn)
-        return response["vector"]
+        return send_data_to_other_worker(conn, other_worker_addr, arr)
 
     if low < high:
         pivot_index = partition(arr, low, high)
@@ -106,5 +108,4 @@ def recv_data(conn):
         data += part
         if len(part) < buffer_size:
             break
-
     return json.loads(data.decode())
