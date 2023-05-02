@@ -25,7 +25,7 @@ def process_request(conn, addr, other_worker_addr):
                 end_time = time.time()
             elif algoritmo in ("3", "4"):
                 start_time = time.time()
-                vector = quick_sort(vector, 0, len(vector) - 1, conn, other_worker_addr, start_time, tiempo_limite, algoritmo)
+                vector = quick_sort(vector, 0, len(vector) - 1, conn, start_time, tiempo_limite, algoritmo)
                 end_time = time.time()
 
             tiempo = round(end_time - start_time, 5)
