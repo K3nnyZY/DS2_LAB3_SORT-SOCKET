@@ -1,6 +1,7 @@
 import random
 import socket
 import json
+import time
 
 class Client:
     def __init__(self):
@@ -88,8 +89,17 @@ try:
                 opc = "4" if pivote == "2" else "3"
             data = {"a": v, "b": opc, "c": float(time_limit)}
 
-        # Enviar la data al primer worker
-        client.send_data(client.s1, data)
+            # Enviar la data al primer worker
+            time.sleep(0.1)  # Agregue esta línea
+            client.send_data(client.s1, data)
+
+            # Esperar el límite de tiempo
+            time.sleep(time_limit)
+
+            # Enviar la data al segundo worker
+            time.sleep(0.1)  # Agregue esta línea
+            client.send_data(client.s2, data)
+
 
         # Recibir el resultado del primer worker
         worker1_result = client.recv_data(client.s1)
