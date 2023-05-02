@@ -85,19 +85,17 @@ try:
                 while pivote not in("1", "2"):
                     print("La opción ingresada es inválida. Intente de nuevo.")
                     pivote = input("\nSeleccione su pivote (1/Izquierda o 2/Derecha): ").strip()
-                opc = "4" if pivote == "2" else "3"
-            data = {"a": v, "b": opc, "c": float(time_limit)}
+            else:
+                pivote = None
+            data = {"a": v, "b": opc, "c": float(time_limit), "d": pivote}
 
         # Enviar la data al primer worker
-        time.sleep(0.1)  # Agregue esta línea
+        time.sleep(0.1)
+        data["worker_id"] = 1
         client.send_data(client.s1, data)
 
         # Esperar el límite de tiempo
         time.sleep(time_limit)
-
-        # Enviar la data al segundo worker
-        time.sleep(0.1)  # Agregue esta línea
-        client.send_data(client.s2, data)
 
         # Recibir el resultado del primer worker
         worker1_result = client.recv_data(client.s1)
@@ -108,6 +106,8 @@ try:
             total_time = worker1_result["Flag"]
         else:
             # Si el primer worker no finalizó a tiempo, enviar la data al segundo worker
+            time.sleep(0.1)
+            data["worker_id"] = 2
             client.send_data(client.s2, data)
 
             # Recibir el resultado del segundo worker
@@ -120,7 +120,7 @@ try:
         print("Tiempo total de ordenamiento: {:.5f} segundos".format(total_time))
 
     print("\nEl programa ha sido interrumpido.")
-    print("Cerrando conexión y liberando el puerto.\n") 
+    print("Cerrando conexión y liberando el puerto.\n")
 
 except KeyboardInterrupt:
     # Para cerrar todo por si acaso

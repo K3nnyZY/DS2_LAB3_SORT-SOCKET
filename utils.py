@@ -3,31 +3,44 @@ import random
 import json
 import heapq
 import socket
-from collections import deque
 
-def send_data_to_other_worker(conn, other_worker_addr, vector):
+
+def is_sorted(arr):
+    return all(arr[i] <= arr[i + 1] for i in range(len(arr) - 1))
+
+
+def send_data_to_other_worker(worker_id, other_worker_addr, vector):
+    if is_sorted(vector):
+        print(f"Worker {worker_id}: Vector is already sorted. Not sending to other worker.")
+        return vector
+
+    print(f"Worker {worker_id}: Sending data to other worker at {other_worker_addr}")
     with socket.socket() as other_worker_conn:
         other_worker_conn.connect(other_worker_addr)
         send_data(other_worker_conn, {"vector": vector})
         response = recv_data(other_worker_conn)
-        return response["vector"]
+        sorted_vector = response["vector"]
+        print(f"Worker {worker_id}: Received sorted data from other worker at {other_worker_addr}: {sorted_vector}")
+        return sorted_vector
 
 
-def merge_sort(arr, conn, other_worker_addr, start_time, time_limit):
+def merge_sort(arr, worker_id, other_worker_addr, start_time, time_limit):
     if time.time() - start_time > time_limit:
-        return send_data_to_other_worker(conn, other_worker_addr, arr)
+        print("Tiempo límite alcanzado en merge_sort, enviando al otro worker...")
+        return send_data_to_other_worker(worker_id, other_worker_addr, arr)
 
     if len(arr) > 1:
         mid = len(arr) // 2
         left = arr[:mid]
         right = arr[mid:]
 
-        left = merge_sort(left, conn, other_worker_addr, start_time, time_limit)
-        right = merge_sort(right, conn, other_worker_addr, start_time, time_limit)
+        left = merge_sort(left, worker_id, other_worker_addr, start_time, time_limit)
+        right = merge_sort(right, worker_id, other_worker_addr, start_time, time_limit)
 
         arr = merge(left, right)
 
     return arr
+
 
 def merge(left, right):
     result = []
@@ -47,9 +60,10 @@ def merge(left, right):
     return result
 
 
-def heap_sort(arr, conn, other_worker_addr, start_time, time_limit):
+def heap_sort(arr, worker_id, other_worker_addr, start_time, time_limit):
     if time.time() - start_time > time_limit:
-        return send_data_to_other_worker(conn, other_worker_addr, arr)
+        print("Tiempo límite alcanzado en heap_sort, enviando al otro worker...")
+        return send_data_to_other_worker(worker_id, other_worker_addr, arr)
 
     heapq.heapify(arr)
 
@@ -62,15 +76,17 @@ def heap_sort(arr, conn, other_worker_addr, start_time, time_limit):
     return sorted_arr
 
 
-def quick_sort(arr, low, high, conn, other_worker_addr, start_time, time_limit):
+def quick_sort(arr, low, high, worker_id, other_worker_addr, start_time, time_limit):
     if time.time() - start_time > time_limit:
-        return send_data_to_other_worker(conn, other_worker_addr, arr)
+        print("Tiempo límite alcanzado en quick_sort, enviando al otro worker...")
+        return send_data_to_other_worker(worker_id, other_worker_addr, arr)
 
     if low < high:
         pivot_index = partition(arr, low, high)
-        quick_sort(arr, low, pivot_index, conn, other_worker_addr, start_time, time_limit)
-        quick_sort(arr, pivot_index + 1, high, conn, other_worker_addr, start_time, time_limit)
+        quick_sort(arr, low, pivot_index, worker_id, other_worker_addr, start_time, time_limit)
+        quick_sort(arr, pivot_index + 1, high, worker_id, other_worker_addr, start_time, time_limit)
     return arr
+
 
 def partition(arr, low, high):
     pivot = arr[low]
@@ -94,13 +110,16 @@ def partition(arr, low, high):
 
     return right
 
+
 def generate_vector(n):
     vector = [random.randint(1, 1000000) for _ in range(n)]
     return vector
 
+
 def send_data(conn, data):
     msg = json.dumps(data).encode()
     conn.sendall(msg)
+
 
 def recv_data(conn):
     buffer_size = 16384
