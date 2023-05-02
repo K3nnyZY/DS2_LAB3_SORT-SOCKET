@@ -90,15 +90,15 @@ try:
             data = {"a": v, "b": opc, "c": float(time_limit)}
 
             # Enviar la data al primer worker
-            time.sleep(0.1)  # Agregue esta línea
-            client.send_data(client.s1, data)
+        time.sleep(0.1)  # Agregue esta línea
+        client.send_data(client.s1, data)
 
-            # Esperar el límite de tiempo
-            time.sleep(time_limit)
+        # Esperar el límite de tiempo
+        time.sleep(time_limit)
 
-            # Enviar la data al segundo worker
-            time.sleep(0.1)  # Agregue esta línea
-            client.send_data(client.s2, data)
+        # Enviar la data al segundo worker
+        time.sleep(0.1)  # Agregue esta línea
+        client.send_data(client.s2, data)
 
 
         # Recibir el resultado del primer worker
