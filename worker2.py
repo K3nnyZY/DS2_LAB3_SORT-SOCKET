@@ -50,7 +50,7 @@ class Worker:
         self.worker_id = worker_id
         self.s = socket.socket()
         self.host = "0.0.0.0"
-        self.port = 12345
+        self.port = 12346
         self.other_worker_addr = other_worker_addr
 
     def start(self):
