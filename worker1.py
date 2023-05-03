@@ -4,8 +4,8 @@ import time
 import threading
 from utils import merge_sort, heap_sort, quick_sort, send_data, recv_data
 
-def process_request(conn, addr, worker_id, other_worker_addr, stop_flag):
-    while not stop_flag.is_set():
+def process_request(conn, addr, worker_id, other_worker_addr):
+    while True:
         try:
             data = recv_data(conn)
             if not data:
@@ -48,20 +48,18 @@ class Worker:
         self.host = "0.0.0.0"
         self.port = 12345
         self.other_worker_addr = other_worker_addr
-        self.stop_flag = threading.Event()
 
     def start(self):
         self.s.bind((self.host, self.port))
         self.s.listen(5)
         print(f"Worker {self.worker_id} iniciado y escuchando en el puerto {self.port}.")
 
-        # Aceptar solo una conexión y procesarla
-        conn, addr = self.s.accept()
-        print(f"Conexión establecida con {addr}")
-        process_request(conn, addr, self.worker_id, self.other_worker_addr, self.stop_flag)
+        while True:
+            conn, addr = self.s.accept()
+            print(f"Conexión establecida con {addr}")
 
-        # Cerrar el socket después de manejar la conexión
-        self.s.close()
+            thread = threading.Thread(target=process_request, args=(conn, addr, self.worker_id, self.other_worker_addr))
+            thread.start()
 
 if __name__ == "__main__":
     worker_id = 1
