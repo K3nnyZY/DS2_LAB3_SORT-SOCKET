@@ -147,4 +147,4 @@ def pass_to_other_worker(arr, worker_id, other_worker_addr, start_time, time_lim
         print(f"\nWorker {worker_id} pasó el vector al otro worker. Esperando resultados...")
         received_data = recv_data(s)  # Cambiar el nombre de la variable de 'recv_data' a 'received_data'
         print(f"\nWorker {worker_id} recibió el vector ordenado parcialmente del otro worker.")
-        return received_data["arr"]
+        return received_data["vector"]

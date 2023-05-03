@@ -102,7 +102,6 @@ try:
                 pivote = None
             data = {"a": v, "b": opc, "c": float(time_limit), "d": pivote}
 
-        # Enviar la data al primer worker
         time.sleep(0.1)
         data["worker_id"] = 1
         client.send_data(client.s1, data)
@@ -112,32 +111,33 @@ try:
 
         # Recibir el resultado del primer worker
         worker1_result = client.recv_data(client.s1)
-        if 'Flag' not in worker1_result:
-            print("Error: 'Flag' not found in received data")
+        if 'tiempo' not in worker1_result:
+            print("Error: 'tiempo' no encontrado en los datos recibidos")
             continue
 
-        if worker1_result["Flag"] <= time_limit:
+        if worker1_result["tiempo"] <= time_limit:
             # Si el primer worker finalizó a tiempo
-            sorted_array = worker1_result["arr"]
-            total_time = worker1_result["Flag"]
+            sorted_array = worker1_result["vector"]
+            total_time = worker1_result["tiempo"]
         else:
-            # Si el primer worker no finalizó a tiempo, enviar la data al segundo worker
+            # Si el primer worker no finalizó a tiempo, enviar la data parcialmente ordenada al segundo worker
             time.sleep(0.1)
             data["worker_id"] = 2
+            data["a"] = worker1_result["vector"]  # Enviar el vector parcialmente ordenado
             client.send_data(client.s2, data)
 
             # Recibir el resultado del segundo worker
             worker2_result = client.recv_data(client.s2)
-            if 'Flag' not in worker2_result:
-                print("Error: 'Flag' not found in received data")
+            if 'tiempo' not in worker2_result:
+                print("Error: 'tiempo' no encontrado en los datos recibidos")
                 continue
 
-            sorted_array = worker2_result["arr"]
-            total_time = worker1_result["Flag"] + worker2_result["Flag"]
+            sorted_array = worker2_result["vector"]
+            total_time = worker1_result["tiempo"] + worker2_result["tiempo"]
 
         print("\nresultado final")
         print("Array ordenado:", sorted_array)
-        print("Tiempo total de ordenamiento: {:.5f} segundos".format(total_time))
+        print("T\niempo total de ordenamiento: {:.5f} segundos".format(total_time))
 
     print("\nEl programa ha sido interrumpido.")
     print("Cerrando conexión y liberando el puerto.\n")
