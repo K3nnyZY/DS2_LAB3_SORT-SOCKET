@@ -8,6 +8,13 @@ class Client:
         self.s1 = socket.socket()
         self.s2 = socket.socket()
 
+    def leer_tiempo_limite(self):
+        t = float(input("\nIngrese el tiempo límite para cada worker en segundos: "))
+        while t <= 0:
+            print("El tiempo límite debe ser mayor a 0.")
+            t = float(input("\nIngrese el tiempo límite para cada worker en segundos: "))
+        return t
+
     def conectar_a_servidor(self, host, port1, port2):
         self.s1.connect((host, port1))
         self.s2.connect((host, port2))
@@ -27,7 +34,7 @@ class Client:
                 break
         decoded_data = json.loads(data.decode())
         if 'worker_id' not in decoded_data:
-            print("Error: 'worker_id' not found in received data")
+            print("Error: 'worker_id' no encontrado en datos recibidos")
         else:
             print(f"Received data from worker {decoded_data['worker_id']}: {decoded_data}")
         return decoded_data
@@ -62,7 +69,7 @@ try:
     port2 = 12346
     client.conectar_a_servidor(host, port1, port2)
 
-    time_limit = 10  # Aquí puedes ajustar el límite de tiempo para cada worker
+    time_limit = client.leer_tiempo_limite()
 
     while True:
         # Lee el vector y valida que esté compuesto únicamente por números

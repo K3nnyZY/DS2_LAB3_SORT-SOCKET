@@ -11,16 +11,16 @@ def is_sorted(arr):
 
 def send_data_to_other_worker(worker_id, other_worker_addr, vector):
     if is_sorted(vector):
-        print(f"Worker {worker_id}: Vector is already sorted. Not sending to other worker.")
+        print(f"Worker {worker_id}: vector ordenado. no se enviara al otro worker.")
         return vector
 
-    print(f"Worker {worker_id}: Sending data to other worker at {other_worker_addr}")
+    print(f"Worker {worker_id}: enviando datos a otro worker en {other_worker_addr}")
     with socket.socket() as other_worker_conn:
         other_worker_conn.connect(other_worker_addr)
         send_data(other_worker_conn, {"a": vector, "b": "1", "c": 0})
         response = recv_data(other_worker_conn)
         sorted_vector = response["arr"]
-        print(f"Worker {worker_id}: Received sorted data from other worker at {other_worker_addr}: {sorted_vector}")
+        print(f"Worker {worker_id}: datos ordenados recibidos del otro worker en {other_worker_addr}: {sorted_vector}")
         return sorted_vector
 
 
