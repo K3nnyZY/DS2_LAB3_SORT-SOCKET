@@ -16,6 +16,9 @@ def process_request(conn, addr, worker_id, other_worker_addr):
             vector = data.get("a", [])
             algoritmo = data["b"]
             tiempo_limite = data.get("c", 0)
+            pivot_type = data.get("d", "1")
+            connection_count = data.get("e", 0)
+            max_connections = data.get("f", 10)
 
             if algoritmo == "1":
                 start_time = time.time()
@@ -27,7 +30,7 @@ def process_request(conn, addr, worker_id, other_worker_addr):
                 end_time = time.time()
             elif algoritmo in ("3", "4"):
                 start_time = time.time()
-                vector = quick_sort(vector, 0, len(vector) - 1, worker_id, other_worker_addr, start_time, tiempo_limite)
+                vector = quick_sort(vector, 0, len(vector) - 1, worker_id, other_worker_addr, start_time, tiempo_limite, pivot_type, connection_count, max_connections)
                 end_time = time.time()
 
             tiempo = round(end_time - start_time, 5)
@@ -64,5 +67,5 @@ class Worker:
 if __name__ == "__main__":
     worker_id = 2
     other_worker_addr = ("127.0.0.1", 12345)  # Cambia la dirección IP y el puerto según su configuración
-    worker1 = Worker(worker_id, other_worker_addr)
-    worker1.start()
+    worker2 = Worker(worker_id, other_worker_addr)
+    worker2.start()

@@ -1,6 +1,7 @@
 import socket
 import json
 import time
+import random
 
 def send_data(conn, data):
     try:
@@ -89,26 +90,31 @@ def heap_sort(arr, worker_id, other_worker_addr, start_time, time_limit):
 
     return arr
 
-def quick_sort(arr, low, high, worker_id, other_worker_addr, start_time, time_limit, pivot_type):
+def quick_sort(arr, low, high, worker_id, other_worker_addr, start_time, time_limit, pivot_type, connection_count, max_connections):
+    if connection_count >= max_connections:
+        raise Exception(f"Se alcanzó el límite máximo de conexiones ({max_connections}). Deteniendo la ejecución.")
     if low < high:
         if time.time() - start_time > time_limit:
             print(f"Worker {worker_id} excedió el tiempo límite. Pasando el vector al otro worker.")
-            return pass_to_other_worker(arr, worker_id, other_worker_addr, start_time, time_limit, "3", low, high, pivot_type)
+            return pass_to_other_worker(arr, worker_id, other_worker_addr, start_time, time_limit, "3", low, high, pivot_type, connection_count)
 
         pivot_index = partition(arr, low, high, pivot_type)
-        quick_sort(arr, low, pivot_index, worker_id, other_worker_addr, start_time, time_limit, pivot_type)
-        quick_sort(arr, pivot_index + 1, high, worker_id, other_worker_addr, start_time, time_limit, pivot_type)
+        quick_sort(arr, low, pivot_index, worker_id, other_worker_addr, start_time, time_limit, pivot_type, connection_count, max_connections)
+        quick_sort(arr, pivot_index + 1, high, worker_id, other_worker_addr, start_time, time_limit, pivot_type, connection_count, max_connections)
 
     return arr
 
-def partition(arr, low, high, pivot_type):
-    if pivot_type == "1":
-        pivot = arr[low]
-    else:
-        pivot = arr[high - 1]
 
-    i = low + 1 if pivot_type == "1" else low
-    j = high - 1 if pivot_type == "2" else high
+def partition(arr, low, high, pivot_type):
+    if pivot_type == "3":
+        pivot_index = random.randint(low, high - 1)
+        pivot = arr[pivot_index]
+        arr[pivot_index], arr[low] = arr[low], arr[pivot_index]
+    else:
+        pivot = arr[low]
+
+    i = low + 1
+    j = high - 1
 
     while True:
         while i <= j and arr[i] < pivot:
@@ -122,15 +128,12 @@ def partition(arr, low, high, pivot_type):
         else:
             break
 
-    if pivot_type == "1":
-        arr[low], arr[j] = arr[j], arr[low]
-    else:
-        arr[high - 1], arr[i] = arr[i], arr[high - 1]
+    arr[low], arr[j] = arr[j], arr[low]
 
-    return j if pivot_type == "1" else i
+    return j
 
 
-def pass_to_other_worker(arr, worker_id, other_worker_addr, start_time, time_limit, algorithm, low=None, high=None, pivot_type=None):
+def pass_to_other_worker(arr, worker_id, other_worker_addr, start_time, time_limit, algorithm, low=None, high=None, pivot_type=None, connection_count=0):
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         s.connect(other_worker_addr)
 
@@ -140,11 +143,12 @@ def pass_to_other_worker(arr, worker_id, other_worker_addr, start_time, time_lim
             "c": float(time_limit),
             "d": pivot_type,
             "e": low,
-            "f": high
+            "f": high,
+            "g": connection_count
         }
 
         send_data(s, data)
         print(f"\nWorker {worker_id} pasó el vector al otro worker. Esperando resultados...")
-        received_data = recv_data(s)  # Cambiar el nombre de la variable de 'recv_data' a 'received_data'
+        received_data = recv_data(s)
         print(f"\nWorker {worker_id} recibió el vector ordenado parcialmente del otro worker.")
         return received_data["vector"]

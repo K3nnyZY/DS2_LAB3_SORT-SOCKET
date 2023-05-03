@@ -64,7 +64,7 @@ class Client:
 
 try:
     client = Client()
-    host = "192.168.1.6"
+    host = "localhost"
     port1 = 12345
     port2 = 12346
     client.conectar_a_servidor(host, port1, port2)
