@@ -4,14 +4,14 @@ import time
 import threading
 from utils import merge_sort, heap_sort, quick_sort, send_data, recv_data
 
-def process_request(conn, addr, worker_id, other_worker_addr):
-    while True:
+def process_request(conn, addr, worker_id, other_worker_addr, stop_flag):
+    while not stop_flag.is_set():
         try:
             data = recv_data(conn)
             if not data:
                 break
 
-            print(f"Worker {worker_id} recibió datos del cliente: {data}") # Agregado
+            print(f"Worker {worker_id} recibió datos del cliente: {data}")
 
             vector = data.get("a", [])
             algoritmo = data["b"]
@@ -48,21 +48,23 @@ class Worker:
         self.host = "0.0.0.0"
         self.port = 12346
         self.other_worker_addr = other_worker_addr
+        self.stop_flag = threading.Event()
 
     def start(self):
         self.s.bind((self.host, self.port))
         self.s.listen(5)
-        print(f"Worker {self.worker_id} iniciado y escuchando en el puerto {self.port}.") # Agregado
+        print(f"Worker {self.worker_id} iniciado y escuchando en el puerto {self.port}.")
 
-        while True:
-            conn, addr = self.s.accept()
-            print(f"Conexión establecida con {addr}")
+        # Aceptar solo una conexión y procesarla
+        conn, addr = self.s.accept()
+        print(f"Conexión establecida con {addr}")
+        process_request(conn, addr, self.worker_id, self.other_worker_addr, self.stop_flag)
 
-            thread = threading.Thread(target=process_request, args=(conn, addr, self.worker_id, self.other_worker_addr))
-            thread.start()
+        # Cerrar el socket después de manejar la conexión
+        self.s.close()
 
 if __name__ == "__main__":
-    worker_id = 2
-    other_worker_addr = ("127.0.0.1", 12346)  # Cambie la dirección IP y el puerto según su configuración
-    worker2 = Worker(worker_id, other_worker_addr)
-    worker2.start()
+    worker_id = 1
+    other_worker_addr = ("127.0.0.1", 12345)  # Cambia la dirección IP y el puerto según su configuración
+    worker1 = Worker(worker_id, other_worker_addr)
+    worker1.start()

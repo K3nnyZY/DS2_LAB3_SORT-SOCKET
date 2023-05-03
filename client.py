@@ -20,7 +20,7 @@ class Client:
         self.s2.connect((host, port2))
 
     def send_data(self, sock, data):
-        print(f"Sending data to worker {data['worker_id']}: {data}")
+        print(f"\nenviando datos a worker {data['worker_id']} ...")
         msg = json.dumps(data).encode()
         sock.sendall(msg)
 
@@ -36,7 +36,7 @@ class Client:
         if 'worker_id' not in decoded_data:
             print("Error: 'worker_id' no encontrado en datos recibidos")
         else:
-            print(f"Received data from worker {decoded_data['worker_id']}: {decoded_data}")
+            print(f"\ndatos recibidos del worker {decoded_data['worker_id']}: {decoded_data}")
         return decoded_data
 
     def generate_random_vector(self, n):
@@ -135,7 +135,8 @@ try:
             sorted_array = worker2_result["arr"]
             total_time = worker1_result["Flag"] + worker2_result["Flag"]
 
-        print("\nArray ordenado:", sorted_array)
+        print("\nresultado final")
+        print("Array ordenado:", sorted_array)
         print("Tiempo total de ordenamiento: {:.5f} segundos".format(total_time))
 
     print("\nEl programa ha sido interrumpido.")
