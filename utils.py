@@ -90,17 +90,16 @@ def heap_sort(arr, worker_id, other_worker_addr, start_time, time_limit):
 
     return arr
 
-def quick_sort(arr, low, high, worker_id, other_worker_addr, start_time, time_limit, pivot_type, connection_count, max_connections):
-    if connection_count >= max_connections:
-        raise Exception(f"Se alcanzó el límite máximo de conexiones ({max_connections}). Deteniendo la ejecución.")
+
+def quick_sort(arr, low, high, worker_id, other_worker_addr, start_time, time_limit, pivot_type):
     if low < high:
         if time.time() - start_time > time_limit:
             print(f"Worker {worker_id} excedió el tiempo límite. Pasando el vector al otro worker.")
-            return pass_to_other_worker(arr, worker_id, other_worker_addr, start_time, time_limit, "3", low, high, pivot_type, connection_count)
+            return pass_to_other_worker(arr, worker_id, other_worker_addr, start_time, time_limit, "3", low, high, pivot_type)
 
         pivot_index = partition(arr, low, high, pivot_type)
-        quick_sort(arr, low, pivot_index, worker_id, other_worker_addr, start_time, time_limit, pivot_type, connection_count, max_connections)
-        quick_sort(arr, pivot_index + 1, high, worker_id, other_worker_addr, start_time, time_limit, pivot_type, connection_count, max_connections)
+        quick_sort(arr, low, pivot_index, worker_id, other_worker_addr, start_time, time_limit, pivot_type)
+        quick_sort(arr, pivot_index + 1, high, worker_id, other_worker_addr, start_time, time_limit, pivot_type)
 
     return arr
 
@@ -108,28 +107,22 @@ def quick_sort(arr, low, high, worker_id, other_worker_addr, start_time, time_li
 def partition(arr, low, high, pivot_type):
     if pivot_type == "3":
         pivot_index = random.randint(low, high - 1)
-        pivot = arr[pivot_index]
-        arr[pivot_index], arr[low] = arr[low], arr[pivot_index]
     else:
-        pivot = arr[low]
-
+        pivot_index = low if pivot_type == "1" else high
+    pivot = arr[pivot_index]
+    arr[pivot_index], arr[low] = arr[low], arr[pivot_index]
     i = low + 1
     j = high - 1
-
     while True:
         while i <= j and arr[i] < pivot:
             i += 1
-
         while i <= j and arr[j] >= pivot:
             j -= 1
-
         if i <= j:
             arr[i], arr[j] = arr[j], arr[i]
         else:
             break
-
     arr[low], arr[j] = arr[j], arr[low]
-
     return j
 
 

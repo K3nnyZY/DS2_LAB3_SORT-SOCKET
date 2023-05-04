@@ -17,8 +17,6 @@ def process_request(conn, addr, worker_id, other_worker_addr):
             algoritmo = data["b"]
             tiempo_limite = data.get("c", 0)
             pivot_type = data.get("d", "1")
-            connection_count = data.get("e", 0)
-            max_connections = data.get("f", 10)
 
             if algoritmo == "1":
                 start_time = time.time()
@@ -30,7 +28,7 @@ def process_request(conn, addr, worker_id, other_worker_addr):
                 end_time = time.time()
             elif algoritmo in ("3", "4"):
                 start_time = time.time()
-                vector = quick_sort(vector, 0, len(vector) - 1, worker_id, other_worker_addr, start_time, tiempo_limite, pivot_type, connection_count, max_connections)
+                vector = quick_sort(vector, 0, len(vector) - 1, worker_id, other_worker_addr, start_time, tiempo_limite, pivot_type)
                 end_time = time.time()
 
             tiempo = round(end_time - start_time, 5)
@@ -44,28 +42,22 @@ def process_request(conn, addr, worker_id, other_worker_addr):
 
     conn.close()
 
-class Worker:
-    def __init__(self, worker_id, other_worker_addr):
-        self.worker_id = worker_id
-        self.s = socket.socket()
-        self.host = "0.0.0.0"
-        self.port = 12345
-        self.other_worker_addr = other_worker_addr
+def start_worker(worker_id, host, port, other_worker_addr):
+    s = socket.socket()
+    s.bind((host, port))
+    s.listen(5)
+    print(f"Worker {worker_id} iniciado y escuchando en el puerto {port}.")
 
-    def start(self):
-        self.s.bind((self.host, self.port))
-        self.s.listen(5)
-        print(f"Worker {self.worker_id} iniciado y escuchando en el puerto {self.port}.")
+    while True:
+        conn, addr = s.accept()
+        print(f"Conexión establecida con {addr}")
 
-        while True:
-            conn, addr = self.s.accept()
-            print(f"Conexión establecida con {addr}")
-
-            thread = threading.Thread(target=process_request, args=(conn, addr, self.worker_id, self.other_worker_addr))
-            thread.start()
+        thread = threading.Thread(target=process_request, args=(conn, addr, worker_id, other_worker_addr))
+        thread.start()
 
 if __name__ == "__main__":
     worker_id = 1
+    host = "0.0.0.0"
+    port = 12345
     other_worker_addr = ("127.0.0.1", 12346)  # Cambia la dirección IP y el puerto según su configuración
-    worker1 = Worker(worker_id, other_worker_addr)
-    worker1.start()
+    start_worker(worker_id, host, port, other_worker_addr)
