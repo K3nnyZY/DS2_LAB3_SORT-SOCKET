@@ -1,5 +1,11 @@
-# Data_Structures2_Lab3
+# Socket y Ordenamiento
 
+## Integrantes:
+- Kenny Zhu
+- Juan Aragon
+- Tomas Cervera
+
+## Laboratorio:
 En este laboratorio su tarea es investigar cómo funcionan los sockets en Java o Python y usarlos para resolver lo siguiente:
 Se desea tener un computador corriendo un programa y que sea el cliente, al comienzo del programa debe preguntarle al usuario qué problema quiere resolver. Los problemas a resolver son:
 ● Dado un vector de n posiciones, ordenarlo de manera ascendente usando el algoritmo de mergesort

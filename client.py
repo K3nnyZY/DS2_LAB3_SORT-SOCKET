@@ -53,10 +53,10 @@ class Client:
 
     def escoger_algoritmo(self):
         print("Escoja entre los algoritmos de ordenamiento:"+
-              "\n1. MergeSort.\n2. HeapSort.\n3. QuickSort.")
+              "\n1. MergeSort.\n2. HeapSort.\n3. QuickSort.\n4. Terminar programa")
         opc = (input("Ingrese su opción: ")).strip()
 
-        while opc not in ("1", "2", "3"):
+        while opc not in ("1", "2", "3", "4"):
             print("Opción inválida. Intente de nuevo.")
             opc = (input("\nIngrese su opción: ")).strip()
 
@@ -74,19 +74,21 @@ try:
     while True:
         # Lee el vector y valida que esté compuesto únicamente por números
         v = []
-        client.leer_vector(v)
+        while True:
+            try:
+                client.leer_vector(v)
+                break
+            except ValueError:
+                print("El tamaño del vector debe ser un número entero. Intente de nuevo.")
 
-        if len(v) < 1:
-            # Si desea cerrar el programa
-            data = json.dumps({"a": 1, "b": "5"})
-            client.send_data(client.s1, data)
-            client.send_data(client.s2, data)
+        opc = client.escoger_algoritmo()
+        
+        if opc == "4":
+            print("Terminando programa...")
             break
 
         else:
-            opc = client.escoger_algoritmo()
             print("\nArray original:", v)
-
             algoritmo = {
                 "1": "MergeSort",
                 "2": "HeapSort",
@@ -137,22 +139,22 @@ try:
 
         print("\nresultado final")
         print("Array ordenado:", sorted_array)
-        print("T\niempo total de ordenamiento: {:.5f} segundos".format(total_time))
+        print("\nTiempo total de ordenamiento: {:.5f} segundos".format(total_time))
 
     print("\nEl programa ha sido interrumpido.")
     print("Cerrando conexión y liberando el puerto.\n")
 
 except KeyboardInterrupt:
     # Para cerrar todo por si acaso
-    print("\n* * * * * * * * * * * * *\n")
+    print("\n----------------------------\n")
     print("El programa ha sido interrumpido de forma repentina.")
     print("Cerrando conexión y liberando el puerto.\n")
 
 except ConnectionRefusedError:
-    print("\nLa conexión ha sido negada. Revise si el servidor está corriendo.\n")
+    print("\nLa conexión ha sido negada. Revise si los servidores está corriendo.\n")
 
 except json.decoder.JSONDecodeError or ConnectionResetError:
-    print("\n* * * * * * * * * * * * *\n")
+    print("\n-----------------------------\n")
     print("El servidor ha dejado de responder")
     print("Cerrando conexión y liberando el puerto.\n")
 
