@@ -40,10 +40,15 @@ def generate_random_vector(n):
     return [random.randint(min_value, max_value) for _ in range(n)]
 
 def leer_vector():
-    n = int(input("\nIngrese el tamaño del vector a generar (entre 1000 y 1000000): "))
-    while n < 1000 or n > 1000000:
-        print("El tamaño del vector debe estar entre 1000 y 1000000.")
-        n = int(input("\nIngrese el tamaño del vector a generar (entre 1000 y 1000000): "))
+    while True:
+        try:
+            n = int(input("\nIngrese el tamaño del vector a generar (entre 1000 y 1000000): "))
+            if n < 1000 or n > 1000000:
+                print("El tamaño del vector debe estar entre 1000 y 1000000.")
+            else:
+                break
+        except ValueError:
+            print("Por favor, ingrese un número válido.")
     return generate_random_vector(n)
 
 def escoger_algoritmo():

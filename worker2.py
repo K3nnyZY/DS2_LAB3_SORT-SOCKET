@@ -56,7 +56,7 @@ def start_worker(worker_id, host, port, other_worker_addr):
         thread.start()
 
 if __name__ == "__main__":
-    worker_id = 1
+    worker_id = 2
     host = "0.0.0.0"
     port = 12346
     other_worker_addr = ("127.0.0.1", 12345)  # Cambia la dirección IP y el puerto según su configuración
