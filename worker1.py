@@ -5,13 +5,21 @@ import threading
 from utils import merge_sort, heap_sort, quick_sort, send_data, recv_data
 
 def process_request(conn, addr, worker_id, other_worker_addr):
+    """Procesa las solicitudes entrantes de los clientes.
+
+    Args:
+        conn: Conexión al cliente.
+        addr: Dirección del cliente.
+        worker_id: Identificador del worker actual.
+        other_worker_addr: Dirección del otro worker.
+    """
     while True:
         try:
             data = recv_data(conn)
             if not data:
                 break
-
-            print(f"Worker {worker_id} recibió datos del cliente: {data}")
+            
+            print(f"Worker {worker_id}: Datos recibidos del cliente: {data}")
 
             vector = data.get("a", [])
             algoritmo = data["b"]
@@ -37,20 +45,28 @@ def process_request(conn, addr, worker_id, other_worker_addr):
             send_data(conn, response)
 
         except (json.decoder.JSONDecodeError, ConnectionResetError):
-            print(f"El cliente {addr} se ha desconectado.")
+            print(f"Worker {worker_id}: El cliente en la dirección {addr} se ha desconectado.")
             break
 
     conn.close()
 
 def start_worker(worker_id, host, port, other_worker_addr):
+    """Inicia un worker y escucha las solicitudes de los clientes.
+
+    Args:
+        worker_id: Identificador del worker actual.
+        host: Dirección IP del host del worker.
+        port: Puerto en el que el worker escuchará las conexiones.
+        other_worker_addr: Dirección del otro worker.
+    """
     s = socket.socket()
     s.bind((host, port))
     s.listen(5)
-    print(f"Worker {worker_id} iniciado y escuchando en el puerto {port}.")
+    print(f"Worker {worker_id} ha iniciado y está escuchando en el puerto {port}. Esperando conexiones...")
 
     while True:
         conn, addr = s.accept()
-        print(f"Conexión establecida con {addr}")
+        print(f"Worker {worker_id}: Conexión establecida con el cliente en la dirección {addr}")
 
         thread = threading.Thread(target=process_request, args=(conn, addr, worker_id, other_worker_addr))
         thread.start()

@@ -4,6 +4,12 @@ import time
 import random
 
 def send_data(conn, data):
+    """Envía datos a través de una conexión de socket.
+    
+    Args:
+        conn: Conexión de socket.
+        data: Datos a enviar.
+    """
     try:
         msg = json.dumps(data).encode()
         conn.sendall(msg)
@@ -12,6 +18,14 @@ def send_data(conn, data):
 
 
 def recv_data(conn):
+    """Recibe datos a través de una conexión de socket.
+    
+    Args:
+        conn: Conexión de socket.
+    
+    Returns:
+        Decodifica y devuelve los datos recibidos en formato JSON.
+    """
     buffer_size = 16384
     data = b""
     while True:
@@ -23,6 +37,20 @@ def recv_data(conn):
 
 
 def merge_sort(arr, worker_id, other_worker_addr, start_time, time_limit):
+    """Implementa el algoritmo de ordenamiento por mezcla (merge sort).
+    
+    Si el tiempo de ejecución excede el límite establecido, se pasa el vector al otro worker.
+    
+    Args:
+        arr: Vector a ordenar.
+        worker_id: Identificador del worker actual.
+        other_worker_addr: Dirección del otro worker.
+        start_time: Tiempo de inicio del proceso de ordenamiento.
+        time_limit: Límite de tiempo para el proceso de ordenamiento.
+    
+    Returns:
+        Vector ordenado.
+    """
     if time.time() - start_time > time_limit:
         print(f"Worker {worker_id} excedió el tiempo límite. Pasando el vector al otro worker.")
         return pass_to_other_worker(arr, worker_id, other_worker_addr, start_time, time_limit, "1")
@@ -40,6 +68,19 @@ def merge_sort(arr, worker_id, other_worker_addr, start_time, time_limit):
     return merge(left, right, worker_id, other_worker_addr, start_time, time_limit)
 
 def merge(left, right, worker_id, other_worker_addr, start_time, time_limit):
+    """Combina dos subvectores ordenados en un vector ordenado.
+    
+    Args:
+        left: Subvector izquierdo.
+        right: Subvector derecho.
+        worker_id: Identificador del worker actual.
+        other_worker_addr: Dirección del otro worker.
+        start_time: Tiempo de inicio del proceso de ordenamiento.
+        time_limit: Límite de tiempo para el proceso de ordenamiento.
+    
+    Returns:
+        Vector ordenado.
+    """
     result = []
     i = j = 0
 
@@ -59,6 +100,13 @@ def merge(left, right, worker_id, other_worker_addr, start_time, time_limit):
     return result
 
 def heapify(arr, n, i):
+    """Reorganiza un subárbol con raíz en el índice `i` en un montículo máximo (heap).
+
+    Args:
+        arr: Vector a reorganizar.
+        n: Tamaño del montículo.
+        i: Índice de la raíz del subárbol.
+    """
     largest = i
     left = 2 * i + 1
     right = 2 * i + 2
@@ -74,6 +122,20 @@ def heapify(arr, n, i):
         heapify(arr, n, largest)
 
 def heap_sort(arr, worker_id, other_worker_addr, start_time, time_limit):
+    """Implementa el algoritmo de ordenamiento por montículos (heap sort).
+
+    Si el tiempo de ejecución excede el límite establecido, se pasa el vector al otro worker.
+
+    Args:
+        arr: Vector a ordenar.
+        worker_id: Identificador del worker actual.
+        other_worker_addr: Dirección del otro worker.
+        start_time: Tiempo de inicio del proceso de ordenamiento.
+        time_limit: Límite de tiempo para el proceso de ordenamiento.
+
+    Returns:
+        Vector ordenado.
+    """
     n = len(arr)
 
     for i in range(n // 2 - 1, -1, -1):
@@ -90,8 +152,24 @@ def heap_sort(arr, worker_id, other_worker_addr, start_time, time_limit):
 
     return arr
 
-
 def quick_sort(arr, low, high, worker_id, other_worker_addr, start_time, time_limit, pivot_type):
+    """Implementa el algoritmo de ordenamiento rápido (quick sort) con diferentes tipos de pivotes.
+
+    Si el tiempo de ejecución excede el límite establecido, se pasa el vector al otro worker.
+
+    Args:
+        arr: Vector a ordenar.
+        low: Índice inferior del rango de ordenamiento.
+        high: Índice superior del rango de ordenamiento.
+        worker_id: Identificador del worker actual.
+        other_worker_addr: Dirección del otro worker.
+        start_time: Tiempo de inicio del proceso de ordenamiento.
+        time_limit: Límite de tiempo para el proceso de ordenamiento.
+        pivot_type: Tipo de pivote a utilizar (1 - primer elemento, 2 - último elemento, 3 - elemento aleatorio).
+
+    Returns:
+        Vector ordenado.
+    """
     if low < high:
         if time.time() - start_time > time_limit:
             print(f"Worker {worker_id} excedió el tiempo límite. Pasando el vector al otro worker.")
@@ -105,6 +183,17 @@ def quick_sort(arr, low, high, worker_id, other_worker_addr, start_time, time_li
 
 
 def partition(arr, low, high, pivot_type):
+    """Función de partición para el algoritmo de ordenamiento rápido (quick sort).
+
+    Args:
+        arr: Vector a ordenar.
+        low: Índice inferior del rango de ordenamiento.
+        high: Índice superior del rango de ordenamiento.
+        pivot_type: Tipo de pivote a utilizar (1 - primer elemento, 2 - último elemento, 3 - elemento aleatorio).
+
+    Returns:
+        Índice del pivote en su posición ordenada.
+    """
     if pivot_type == "3":
         pivot_index = random.randint(low, high - 1)
     else:
@@ -127,6 +216,23 @@ def partition(arr, low, high, pivot_type):
 
 
 def pass_to_other_worker(arr, worker_id, other_worker_addr, start_time, time_limit, algorithm, low=None, high=None, pivot_type=None, connection_count=0):
+    """Pasa el vector a otro worker para continuar el proceso de ordenamiento.
+
+    Args:
+        arr: Vector a ordenar.
+        worker_id: Identificador del worker actual.
+        other_worker_addr: Dirección del otro worker.
+        start_time: Tiempo de inicio del proceso de ordenamiento.
+        time_limit: Límite de tiempo para el proceso de ordenamiento.
+        algorithm: Algoritmo de ordenamiento utilizado (1 - merge sort, 2 - heap sort, 3 - quick sort).
+        low: Índice inferior del rango de ordenamiento (para quick sort).
+        high: Índice superior del rango de ordenamiento (para quick sort).
+        pivot_type: Tipo de pivote a utilizar (para quick sort).
+        connection_count: Contador de conexiones entre workers.
+
+    Returns:
+        Vector ordenado parcialmente.
+    """
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         s.connect(other_worker_addr)
 

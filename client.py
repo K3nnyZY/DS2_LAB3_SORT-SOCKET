@@ -4,6 +4,7 @@ import json
 import time
 
 def leer_tiempo_limite():
+    """Lee el tiempo límite para cada worker en segundos."""
     t = float(input("\nIngrese el tiempo límite para cada worker en segundos: "))
     while t <= 0:
         print("El tiempo límite debe ser mayor a 0.")
@@ -11,15 +12,38 @@ def leer_tiempo_limite():
     return t
 
 def conectar_a_servidor(host, port1, port2, s1, s2):
+    """Conecta al cliente a dos workers.
+
+    Args:
+        host: Dirección IP del host de los workers.
+        port1: Puerto del primer worker.
+        port2: Puerto del segundo worker.
+        s1: Socket del primer worker.
+        s2: Socket del segundo worker.
+    """
     s1.connect((host, port1))
     s2.connect((host, port2))
 
 def send_data(sock, data):
-    print(f"\nenviando datos a worker {data['worker_id']} ...")
+    """Envía datos al worker correspondiente.
+
+    Args:
+        sock: Socket del worker al que se enviarán los datos.
+        data: Datos a enviar al worker.
+    """
+    print(f"\nEnviando datos al worker {data['worker_id']}...")
     msg = json.dumps(data).encode()
     sock.sendall(msg)
 
 def recv_data(sock):
+    """Recibe datos del worker.
+
+    Args:
+        sock: Socket del worker del que se recibirán los datos.
+
+    Returns:
+        decoded_data: Datos recibidos del worker.
+    """
     buffer_size = 16384
     data = b""
     while True:
@@ -31,20 +55,29 @@ def recv_data(sock):
     if 'worker_id' not in decoded_data:
         print("Error: 'worker_id' no encontrado en datos recibidos")
     else:
-        print(f"\ndatos recibidos del worker {decoded_data['worker_id']}: {decoded_data}")
+        print(f"\nDatos recibidos del worker {decoded_data['worker_id']}: {decoded_data}")
     return decoded_data
 
 def generate_random_vector(n):
+    """Genera un vector aleatorio de tamaño n.
+
+    Args:
+        n: Tamaño del vector a generar.
+
+    Returns:
+        vector: Vector aleatorio generado.
+    """
     min_value = 1
-    max_value = 1000000
+    max_value = 100000
     return [random.randint(min_value, max_value) for _ in range(n)]
 
 def leer_vector():
+    """Lee el tamaño del vector y genera un vector aleatorio con ese tamaño."""
     while True:
         try:
-            n = int(input("\nIngrese el tamaño del vector a generar (entre 1000 y 1000000): "))
-            if n < 1000 or n > 1000000:
-                print("El tamaño del vector debe estar entre 1000 y 1000000.")
+            n = int(input("\nIngrese el tamaño del vector a generar (entre 1000 y 100000): "))
+            if n < 1000 or n > 100000:
+                print("El tamaño del vector debe estar entre 1000 y 100000.")
             else:
                 break
         except ValueError:
@@ -52,6 +85,7 @@ def leer_vector():
     return generate_random_vector(n)
 
 def escoger_algoritmo():
+    """Permite al usuario seleccionar un algoritmo de ordenamiento."""
     print("Escoja entre los algoritmos de ordenamiento:"+
           "\n1. MergeSort.\n2. HeapSort.\n3. QuickSort.\n4. Terminar programa")
     opc = (input("Ingrese su opción: ")).strip()
@@ -61,7 +95,6 @@ def escoger_algoritmo():
         opc = (input("\nIngrese su opción: ")).strip()
 
     return opc
-
 
 try:
     host = "localhost"
@@ -134,8 +167,8 @@ try:
         print("Array ordenado:", sorted_array)
         print("\nTiempo total de ordenamiento: {:.5f} segundos".format(total_time))
 
-    print("\nEl programa ha sido interrumpido.")
-    print("Cerrando conexión y liberando el puerto.\n")
+    print("\nEl programa ha sido detenido por el usuario.")
+    print("Cerrando conexiones y liberando recursos.\n")
 
 except KeyboardInterrupt:
     # Para cerrar todo por si acaso
