@@ -46,7 +46,7 @@ Para probar el programa en 3 computadoras diferentes, sigue estos pasos:
 other_worker_addr = ("192.168.1.102", 12346)
 ```
 - Haz lo mismo en worker2.py, pero usando la dirección IP de la computadora que ejecuta worker1.py.
-5. En la computadora cliente, actualiza las direcciones IP y los puertos de host, port1 y port2 en client.py para que coincidan con las direcciones IP y los puertos de las computadoras que ejecutan los workers. Por ejemplo, si la dirección IP de la computadora que ejecuta worker1.py es 192.168.1.101 y la de worker2.py es 192.168.1.102, debes cambiar las líneas en client.py de host = "localhost a:
+5. En la computadora cliente, actualiza las direcciones IP y los puertos de host, port1 y port2 en client.py para que coincidan con las direcciones IP y los puertos de las computadoras que ejecutan los workers. Por ejemplo, si la dirección IP de la computadora que ejecuta worker1.py es 192.168.1.101 y la de worker2.py es 192.168.1.102, debes cambiar las líneas en client.py de host = "localhost", a:
 ```
 host = "192.168.1.101"
 ports = [12345, 12346]
