@@ -119,14 +119,14 @@ def escoger_algoritmo():
     return opc
 
 try:
-    host = "localhost"
+    host = "localhost" # si quiere utilizar en diferente pc cambia el host segun el ip de su computadora
     ports = [12345, 12346]
     sockets = [socket.socket() for _ in ports]
 
     for i, port in enumerate(ports):
         conectar_a_servidor(host, port, sockets[i])
 
-    time_limit = leer_tiempo_limite()
+    Z_time = leer_tiempo_limite()
 
     while True:
         # Lee el vector y valida que esté compuesto únicamente por números
@@ -153,7 +153,7 @@ try:
                     pivote = input("\nSeleccione su pivote (1/Izquierda o 2/Derecha): ").strip()
             else:
                 pivote = None
-            data = {"a": v, "b": opc, "c": float(time_limit), "d": pivote}
+            data = {"a": v, "b": opc, "c": float(Z_time), "d": pivote}
 
         success = False
         total_time = 0
@@ -163,7 +163,7 @@ try:
             send_data_to_worker(sockets, current_worker, data)
 
             # Esperar el límite de tiempo
-            time.sleep(time_limit)
+            time.sleep(Z_time)
 
             # Recibir el resultado del worker actual
             worker_result = recv_data_from_worker(sockets, current_worker)
@@ -171,7 +171,7 @@ try:
                 print("Error: 'tiempo' no encontrado en los datos recibidos")
                 continue
 
-            if worker_result["tiempo"] <= time_limit:
+            if worker_result["tiempo"] <= Z_time:
                 # Si el worker actual finalizó a tiempo
                 sorted_array = worker_result["vector"]
                 total_time += worker_result["tiempo"]
