@@ -11,7 +11,7 @@ def leer_tiempo_limite():
         t = float(input("\nIngrese el tiempo límite para cada worker en segundos: "))
     return t
 
-def conectar_a_servidor(host, port1, port2, s1, s2):
+def conectar_a_servidor(host, port, s):
     """Conecta al cliente a dos workers.
 
     Args:
@@ -21,8 +21,8 @@ def conectar_a_servidor(host, port1, port2, s1, s2):
         s1: Socket del primer worker.
         s2: Socket del segundo worker.
     """
-    s1.connect((host, port1))
-    s2.connect((host, port2))
+    s.connect((host, port))
+    print(f"Conectado al servidor en {host}:{port}")
 
 def send_data(sock, data):
     """Envía datos al worker correspondiente.
@@ -57,6 +57,28 @@ def recv_data(sock):
     else:
         print(f"\nDatos recibidos del worker {decoded_data['worker_id']}: {decoded_data}")
     return decoded_data
+
+def send_data_to_worker(sockets, worker_id, data):
+    """Envía datos al worker correspondiente.
+
+    Args:
+        sockets: Lista de sockets de los workers.
+        worker_id: ID del worker al que se enviarán los datos.
+        data: Datos a enviar al worker.
+    """
+    send_data(sockets[worker_id - 1], data)
+
+def recv_data_from_worker(sockets, worker_id):
+    """Recibe datos del worker.
+
+    Args:
+        sockets: Lista de sockets de los workers.
+        worker_id: ID del worker del que se recibirán los datos.
+
+    Returns:
+        decoded_data: Datos recibidos del worker.
+    """
+    return recv_data(sockets[worker_id - 1])
 
 def generate_random_vector(n):
     """Genera un vector aleatorio de tamaño n.
@@ -98,11 +120,11 @@ def escoger_algoritmo():
 
 try:
     host = "localhost"
-    port1 = 12345
-    port2 = 12346
-    s1 = socket.socket()
-    s2 = socket.socket()
-    conectar_a_servidor(host, port1, port2, s1, s2)
+    ports = [12345, 12346]
+    sockets = [socket.socket() for _ in ports]
+
+    for i, port in enumerate(ports):
+        conectar_a_servidor(host, port, sockets[i])
 
     time_limit = leer_tiempo_limite()
 
@@ -138,16 +160,13 @@ try:
         current_worker = 1
         while not success:
             data["worker_id"] = current_worker
-            if current_worker == 1:
-                send_data(s1, data)
-            else:
-                send_data(s2, data)
+            send_data_to_worker(sockets, current_worker, data)
 
             # Esperar el límite de tiempo
             time.sleep(time_limit)
 
             # Recibir el resultado del worker actual
-            worker_result = recv_data(s1) if current_worker == 1 else recv_data(s2)
+            worker_result = recv_data_from_worker(sockets, current_worker)
             if 'tiempo' not in worker_result:
                 print("Error: 'tiempo' no encontrado en los datos recibidos")
                 continue
@@ -185,5 +204,5 @@ except json.decoder.JSONDecodeError or ConnectionResetError:
     print("Cerrando conexión y liberando el puerto.\n")
 
 finally:
-    s1.close()
-    s2.close()
+    for s in sockets:
+        s.close()
