@@ -23,17 +23,17 @@ Una vez decidido el problema a resolver este debe ser mandado a otro computador 
 1. Asegúra tener Python instalado en tu computadora. 
 2. Abre 3 terminales o ventanas de línea de comandos, puede hacerlo en VsCode creando o abriendo 3 terminales, para no dificultarse en cambiar los IP. En cada una de ellas, navega hasta la carpeta donde se encuentran los archivos.
 3. En la primera terminal, ejecuta el primer woker ejecutando este comando:
-'''
+```
 python worker1.py
-'''
+```
 En la segunda terminal, ejecuta el segundo woker ejecutando este comando:
-'''
+```
 python worker2.py
-'''
+```
 En la tercera terminal, ejecuta el cliente ejecutando este comando:
-'''
+```
 python client.py
-'''
+```
 
 ### Ejecucion en computadoras distintas
 Para probar el programa en 3 computadoras diferentes, sigue estos pasos:
@@ -42,15 +42,15 @@ Para probar el programa en 3 computadoras diferentes, sigue estos pasos:
 3. Determina las direcciones IP de las dos computadoras que ejecutarán los workers. Puedes hacerlo ejecutando ipconfig en Windows o en mac buscarlo en preferencias de sistemas.
 4. Actualiza la dirección y el puerto de other_worker_addr en worker1.py y worker2.py para que apunte a la dirección IP y el puerto del otro worker.
 - Por ejemplo, si la dirección IP de la computadora que ejecuta worker2.py es 192.168.1.102, deberás cambiar la línea en worker1.py que define other_worker_addr a:
-'''
+```
 other_worker_addr = ("192.168.1.102", 12346)
-'''
+```
 - Haz lo mismo en worker2.py, pero usando la dirección IP de la computadora que ejecuta worker1.py.
 5. En la computadora cliente, actualiza las direcciones IP y los puertos de host, port1 y port2 en client.py para que coincidan con las direcciones IP y los puertos de las computadoras que ejecutan los workers. Por ejemplo, si la dirección IP de la computadora que ejecuta worker1.py es 192.168.1.101 y la de worker2.py es 192.168.1.102, debes cambiar las líneas en client.py de host = "localhost a:
-'''
+```
 host = "192.168.1.101"
 ports = [12345, 12346]
-'''
+```
 6. Ejecuta worker1.py en la primera computadora de worker y worker2.py en la segunda computadora de worker. Estos programas ahora deberían estar escuchando conexiones entrantes.
 7. Ejecuta client.py en la computadora cliente. El programa cliente debería conectarse a ambos workers y podrás comenzar a probar las funciones de ordenamiento.
 
